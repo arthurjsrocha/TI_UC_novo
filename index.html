@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+   <title>TI e UC</title>
+  
+     <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin=""/>
+
+    <script type="text/javascript" src="UCintegralAmz.js"></script>
+    <script type="text/javascript" src="terraIndAmz.js"></script>
+    <script type="text/javascript" src="amzInter.js"></script>
+    <script type="text/javascript" src="amzBioma.js"></script>
+    <script type="text/javascript" src="amzLegal.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin="" ></script>
+    
+    <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    .leaflet-container {
+      height: 400px;
+      width: 600px;
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
+
+
+  <style>#map { width: 800px; height: 500px; }
+.info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
+.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }</style>
+  
+  </head>
+
+<body>
+
+<div id="map" style="width: 2000px; height: 1000px;"></div>
+
+
+<script>
+  var map = L.map('map').setView([-9.538040, -56.607200], 5);
+  const tiles = L.tileLayer('https://api.mapbox.com/styles/v1/arthurjrocha/cl9pqbjcn000c15ny0z25xkre/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXJ0aHVyanJvY2hhIiwiYSI6ImNsMXBjeGF0OTA0eXYzY3BndWpsbm15MTgifQ.U5WAS-rQQcswwiysi7mjaQ', {
+    maxZoom: 19,
+    attribution: '<a href="https://www.linkedin.com/in/arthur-rocha-56937a234/">Arthur Rocha</a>'
+  }).addTo(map);
+
+  // ---- control that shows state info on hover
+  const info = L.control();
+
+  info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info');
+    this.update();
+    return this._div;
+  };
+
+  info.update = function (props) {
+    
+    this._div.innerHTML = '<b>Terras Indígenas e Unidades Conservação na Amazônia Legal</b>';
+  };
+
+  info.addTo(map);
+
+  
+// ---- Layer control 
+
+// Amazônia Legal
+var aLegal = L.geoJSON(amzLegal, {
+      opacity: 1,
+      color: 'yellow',
+      dashArray: '2',
+      fillOpacity: 0,
+ })//.addTo(map);
+
+// Bioma da Amazônia
+var aBioma = L.geoJSON(amzBioma, {
+      opacity: 1,
+      color: '#7CFC00',
+      dashArray: '6',
+      fillOpacity: 0,
+ }).addTo(map)
+
+// Amazônia Internacional
+var aInter = L.geoJSON(amzInter, {
+      opacity: 1,
+      color: '#00FF00',
+      dashArray: '2',
+      fillOpacity: 0,
+ })//.addTo(map)
+
+var overlays = {
+  'Amazônia Legal': aLegal,
+  'Bioma da Amazônia': aBioma,
+  'Amazônia Internacional': aInter
+
+};
+
+
+// ---- COR PARA UNIDADES DE PROTEÇÃO INTEGRAL
+const geojsonMarkerOptions = {
+    radius: 4,
+    fillColor: "yellow",
+    color: "pink",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.001,
+  };
+
+  // ---- COR PARA TERRAS INDÍGENAS
+const geojsonMarkerOptions1 = {
+    radius: 4,
+    fillColor: "#00FF00",
+    color: "white",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.001,
+  };
+
+// ---- SHAPE DE UNIDADES DE CONSERVAÇÃO INTEGRAL
+  var lightData1 = L.geoJSON(UCintegralAmz, {
+    onEachFeature: function (feature, layer) {
+
+           const popupContent =
+          '<h4 class = "text-primary">Unidade de Conservação de Proteção Integral</h4>' +
+          '<div class="container"><table class="table table-striped">' +
+          "<thead></thead>" +
+          "<tbody><tr><td> Nome </td><td>" +
+          feature.properties.nome +
+          "</td></tr>" +
+
+          "</td></tr>" +
+          "<tr><td> Categoria </td><td>" +
+          feature.properties.categoria +
+          "</td></tr>" +
+          "<tr><td> Grupo </td><td>" +
+          feature.properties.grupo +
+          "</td></tr>" +
+          "<tr><td> UF </td><td>" +
+          feature.properties.uf +
+          "</td></tr>";
+          
+          layer.bindPopup(popupContent);
+
+    },
+    style: geojsonMarkerOptions
+  })//.addTo(map);
+
+
+  // ---- SHAPE DE TERRAS INDÍGENAS
+  var lightData = L.geoJSON(terraIndAmz, {
+    onEachFeature: function (feature, layer) {
+
+           const popupContent =
+          '<h4 class = "text-primary">Terra Indígena</h4>' +
+          '<div class="container"><table class="table table-striped">' +
+          "<thead><tr></tr></thead>" +
+          "<tbody><tr><td>Nome</td><td>" +
+          feature.properties.terrai_nom +
+          "</td></tr>" +
+          
+          "</td></tr>" +
+          "<tr><td>Grupo étnico </td><td>" +
+          feature.properties.etnia_nome +
+          "</td></tr>" +
+          "<tr><td> UF </td><td>" +
+          feature.properties.uf_sigla +
+          "</td></tr>" +
+          "<tr><td>Situação</td><td>" +
+          feature.properties.fase_ti +
+          "</td></tr>";
+          
+          layer.bindPopup(popupContent);
+
+    },
+    style: geojsonMarkerOptions1
+  }).addTo(map);
+
+var overlays2 = {
+  'Terras Indígenas': lightData,
+  'Unidades de Conservação Integral': lightData1,
+
+
+};
+
+L.control.layers(overlays,overlays2).addTo(map);
+
+// Escala 
+L.control.scale().addTo(map)
+
+</script>
+
+
+
+</body>
+</html>
